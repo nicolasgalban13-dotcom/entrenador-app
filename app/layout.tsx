@@ -1,6 +1,6 @@
 import "./globals.css";
 import Link from "next/link";
-import AuthGuard from "./components/authguard";
+import AuthGuard from "./components/AuthGuard";
 
 export const metadata = {
   title: "Entrenador App",
