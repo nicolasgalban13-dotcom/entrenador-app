@@ -1,5 +1,6 @@
 import "./globals.css";
 import Link from "next/link";
+import AuthGuard from "./components/authguard";
 
 export const metadata = {
   title: "Entrenador App",
@@ -14,29 +15,31 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        <nav className="bg-gray-900 text-white p-4 flex gap-6">
-          <Link href="/" className="hover:text-blue-400">
-            Inicio
-          </Link>
+        <AuthGuard>
+          <nav className="bg-gray-900 text-white p-4 flex gap-6">
+            <Link href="/" className="hover:text-blue-400">
+              Inicio
+            </Link>
 
-          <Link href="/jugadoras" className="hover:text-blue-400">
-            Jugadoras
-          </Link>
+            <Link href="/jugadoras" className="hover:text-blue-400">
+              Jugadoras
+            </Link>
 
-          <Link href="/entrenamientos" className="hover:text-blue-400">
-            Entrenamientos
-          </Link>
+            <Link href="/entrenamientos" className="hover:text-blue-400">
+              Entrenamientos
+            </Link>
 
-          <Link href="/asistencias" className="hover:text-blue-400">
-            Asistencias
-          </Link>
+            <Link href="/asistencias" className="hover:text-blue-400">
+              Asistencias
+            </Link>
 
-          <Link href="/partidos" className="hover:text-blue-400">
-            Partidos
-          </Link>
-        </nav>
+            <Link href="/partidos" className="hover:text-blue-400">
+              Partidos
+            </Link>
+          </nav>
 
-        <div>{children}</div>
+          <div>{children}</div>
+        </AuthGuard>
       </body>
     </html>
   );
