@@ -63,17 +63,45 @@ export default function Entrenamientos() {
   // =========================
   // CREAR ENTRENAMIENTO
   // =========================
-  const crearEntrenamiento = async () => {
-    if (!nuevaFecha) return;
+const crearEntrenamiento = async () => {
+  if (!nuevaFecha) return;
 
-    await supabase.from("entrenamiento").insert({
+  const { data: nuevoEntreno, error } = await supabase
+    .from("entrenamiento")
+    .insert({
       fecha: nuevaFecha,
       tipo: nuevoTipo,
-    });
+    })
+    .select()
+    .single();
 
-    setNuevaFecha("");
-    cargarEntrenamientos();
-  };
+  if (error || !nuevoEntreno) {
+    console.error("Error creando entrenamiento:", error);
+    return;
+  }
+
+  const { data: jugadoras } = await supabase
+    .from("jugadoras")
+    .select("id")
+    .eq("activa", true);
+
+  // SI no hay jugadoras, usar array vacío
+  const asistenciasIniciales = (jugadoras ?? []).map((j) => ({
+    jugadora_id: j.id,
+    entrenamiento_id: nuevoEntreno.id,
+    presente: false,
+  }));
+
+  // insertar asistencias solo si hay algo
+  if (asistenciasIniciales.length > 0) {
+    await supabase
+      .from("asistencias")
+      .insert(asistenciasIniciales);
+  }
+
+  setNuevaFecha("");
+  cargarEntrenamientos();
+};
 
   // =========================
   // GENERAR SEMANA
@@ -123,19 +151,19 @@ export default function Entrenamientos() {
   };
 
   const toggleAsistencia = async (jugadoraId: number) => {
-    if (!seleccionado) return;
-    if (seleccionado.tipo === "Libre") return;
+  if (!seleccionado) return;
+  if (seleccionado.tipo === "Libre") return;
 
-    const actual = asistencias[jugadoraId];
+  const actual = asistencias[jugadoraId] ?? false;
 
-    await supabase.from("asistencias").upsert({
-      jugadora_id: jugadoraId,
-      entrenamiento_id: seleccionado.id,
-      presente: !actual,
-    });
+  await supabase.from("asistencias").upsert({
+    jugadora_id: jugadoraId,
+    entrenamiento_id: seleccionado.id,
+    presente: !actual,
+  });
 
-    cargarAsistencias(seleccionado.id);
-  };
+  cargarAsistencias(seleccionado.id);
+};
 
   // =========================
   // ELIMINAR ENTRENAMIENTO

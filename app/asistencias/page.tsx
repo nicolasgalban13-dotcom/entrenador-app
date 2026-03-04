@@ -45,27 +45,40 @@ export default function Asistencias() {
       if (a.entrenamiento.tipo === "Libre")
         return;
 
-      const fecha = a.entrenamiento.fecha;
-      const mesEntreno = fecha.slice(0, 7);
-      const esMesActual =
-        mesEntreno === mesSeleccionado;
+const fecha = a.entrenamiento.fecha;
+const mesEntreno = fecha.slice(0, 7);
+const esMesActual = mesEntreno === mesSeleccionado;
 
-      const id = a.jugadora.id;
+const id = a.jugadora.id;
 
-      if (!mapa[id]) {
-        mapa[id] = {
-          id,
-          nombre: a.jugadora.nombre,
-          numero_camiseta:
-            a.jugadora.numero_camiseta,
-          presentesMes: 0,
-          totalMes: 0,
-          presentesGeneral: 0,
-          totalGeneral: 0,
-          dias: {},
-        };
-      }
+/* 1️⃣ CREAR JUGADORA EN EL MAPA */
+if (!mapa[id]) {
+  mapa[id] = {
+    id,
+    nombre: a.jugadora.nombre,
+    numero_camiseta: a.jugadora.numero_camiseta,
+    presentesMes: 0,
+    totalMes: 0,
+    presentesGeneral: 0,
+    totalGeneral: 0,
+    dias: {},
+    meses: {}, // ← importante
+  };
+}
 
+/* 2️⃣ REGISTRAR MES */
+if (!mapa[id].meses[mesEntreno]) {
+  mapa[id].meses[mesEntreno] = {
+    presentes: 0,
+    total: 0,
+  };
+}
+
+mapa[id].meses[mesEntreno].total++;
+
+if (a.presente) {
+  mapa[id].meses[mesEntreno].presentes++;
+}
       // GENERAL
       mapa[id].totalGeneral++;
       if (a.presente)
@@ -101,21 +114,31 @@ export default function Asistencias() {
     );
 
     const resultado = Object.values(mapa).map(
-      (r: any) => ({
-        ...r,
-        porcentajeMes:
-  entrenosOrdenados.length > 0
-    ? Math.round((r.presentesMes / entrenosOrdenados.length) * 100)
-    : 0,
-        porcentajeGeneral:
-          r.totalGeneral > 0
-            ? Math.round(
-                (r.presentesGeneral /
-                  r.totalGeneral) *
-                  100
-              )
-            : 0,
-      })
+      (r: any) => {
+
+  const meses = Object.values((r as any).meses || {});
+
+  const porcentajesMes = meses.map((m: any) =>
+    m.total > 0 ? (m.presentes / m.total) * 100 : 0
+  );
+
+  const promedioGeneral =
+    porcentajesMes.length > 0
+      ? Math.round(
+          porcentajesMes.reduce((a: number, b: number) => a + b, 0) /
+          porcentajesMes.length
+        )
+      : 0;
+
+  return {
+    ...r,
+    porcentajeMes:
+      entrenosOrdenados.length > 0
+        ? Math.round((r.presentesMes / entrenosOrdenados.length) * 100)
+        : 0,
+    porcentajeGeneral: promedioGeneral,
+  };
+}
     );
 
     resultado.sort(
@@ -205,7 +228,7 @@ export default function Asistencias() {
                         ? "✅"
                         : j.dias[e.id] === false
                         ? "❌"
-                        : "-"}
+                        : "❌"}
                     </td>
                   )
                 )}
