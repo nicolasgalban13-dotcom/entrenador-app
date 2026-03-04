@@ -150,19 +150,28 @@ const crearEntrenamiento = async () => {
     cargarEntrenamientos();
   };
 
-  const toggleAsistencia = async (jugadoraId: number) => {
+ const toggleAsistencia = async (jugadoraId: number) => {
   if (!seleccionado) return;
   if (seleccionado.tipo === "Libre") return;
 
   const actual = asistencias[jugadoraId] ?? false;
 
-  await supabase.from("asistencias").upsert({
-    jugadora_id: jugadoraId,
-    entrenamiento_id: seleccionado.id,
-    presente: !actual,
-  });
+  const { error } = await supabase
+    .from("asistencias")
+    .update({ presente: !actual })
+    .eq("jugadora_id", jugadoraId)
+    .eq("entrenamiento_id", seleccionado.id);
 
-  cargarAsistencias(seleccionado.id);
+  if (error) {
+    console.error("Error actualizando asistencia:", error);
+    return;
+  }
+
+  // actualizar estado local inmediatamente (más rápido que recargar)
+  setAsistencias((prev) => ({
+    ...prev,
+    [jugadoraId]: !actual,
+  }));
 };
 
   // =========================

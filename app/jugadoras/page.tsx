@@ -92,6 +92,22 @@ export default function Jugadoras() {
     cargarJugadoras();
   };
 
+  /* =========================
+     ESTADÍSTICAS DEL PLANTEL
+     ========================= */
+
+  const jugadorasActivas = jugadoras.filter(j => j.activa);
+  const jugadorasInactivas = jugadoras.filter(j => !j.activa);
+
+  const totalJugadoras = jugadoras.length;
+  const totalActivas = jugadorasActivas.length;
+  const totalInactivas = jugadorasInactivas.length;
+
+  const porcentajeActivas =
+    totalJugadoras > 0
+      ? Math.round((totalActivas / totalJugadoras) * 100)
+      : 0;
+
   return (
     <main className="min-h-screen bg-gray-100 p-10">
       <div className="mb-8">
@@ -99,6 +115,26 @@ export default function Jugadoras() {
         <p className="text-gray-500">Gestión y administración del equipo</p>
       </div>
 
+      {/* ESTADISTICAS */}
+      <div className="bg-white p-4 rounded-xl shadow mb-8 flex gap-6">
+        <div className="font-semibold">
+          Total: {totalJugadoras}
+        </div>
+
+        <div className="text-green-600 font-semibold">
+          Activas: {totalActivas}
+        </div>
+
+        <div className="text-red-600 font-semibold">
+          Inactivas: {totalInactivas}
+        </div>
+
+        <div className="text-blue-600 font-semibold">
+          Disponibilidad: {porcentajeActivas}%
+        </div>
+      </div>
+
+      {/* FORMULARIO */}
       <div className="bg-white p-6 rounded-2xl shadow-md max-w-xl mb-8">
         <h2 className="text-xl font-bold mb-4">
           {editandoId ? "Editar Jugadora" : "Nueva Jugadora"}
@@ -148,11 +184,14 @@ export default function Jugadoras() {
         )}
       </div>
 
-      <div className="space-y-3">
-        {jugadoras.map((j) => (
+      {/* JUGADORAS ACTIVAS */}
+      <h2 className="text-xl font-bold mb-3">Jugadoras Activas</h2>
+
+      <div className="space-y-3 mb-10">
+        {jugadorasActivas.map((j) => (
           <div
             key={j.id}
-            className="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center hover:shadow-md transition mb-3"
+            className="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center hover:shadow-md transition"
           >
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-blue-100 text-blue-700 font-bold rounded-full flex items-center justify-center">
@@ -166,10 +205,6 @@ export default function Jugadoras() {
                   <div className="text-sm text-gray-500">
                     {j.edad} años
                   </div>
-                )}
-
-                {!j.activa && (
-                  <div className="text-xs text-red-500">Inactiva</div>
                 )}
               </div>
             </div>
@@ -186,12 +221,46 @@ export default function Jugadoras() {
                 onClick={() => toggleActiva(j)}
                 className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
               >
-                {j.activa ? "Desactivar" : "Activar"}
+                Desactivar
               </button>
             </div>
           </div>
         ))}
       </div>
+
+      {/* JUGADORAS INACTIVAS */}
+      {jugadorasInactivas.length > 0 && (
+        <>
+          <h2 className="text-xl font-bold mb-3">Jugadoras Inactivas</h2>
+
+          <div className="space-y-3">
+            {jugadorasInactivas.map((j) => (
+              <div
+                key={j.id}
+                className="bg-gray-100 p-4 rounded-2xl shadow-sm flex justify-between items-center"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-gray-300 text-gray-700 font-bold rounded-full flex items-center justify-center">
+                    {j.numero_camiseta || "?"}
+                  </div>
+
+                  <div>
+                    <div className="font-semibold text-lg">{j.nombre}</div>
+                    <div className="text-xs text-red-500">Inactiva</div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => toggleActiva(j)}
+                  className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                >
+                  Activar
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </main>
   );
 }

@@ -118,18 +118,19 @@ if (a.presente) {
 
   const meses = Object.values((r as any).meses || {});
 
-  const porcentajesMes = meses.map((m: any) =>
-    m.total > 0 ? (m.presentes / m.total) * 100 : 0
-  );
+// solo meses que realmente tuvieron entrenamientos
+const mesesActivos = meses.filter((m: any) => m.total > 0);
 
-  const promedioGeneral =
-    porcentajesMes.length > 0
-      ? Math.round(
-          porcentajesMes.reduce((a: number, b: number) => a + b, 0) /
-          porcentajesMes.length
-        )
-      : 0;
-
+const promedioGeneral =
+  mesesActivos.length > 0
+    ? Math.round(
+        mesesActivos.reduce(
+          (acc: number, m: any) =>
+            acc + (m.presentes / m.total) * 100,
+          0
+        ) / mesesActivos.length
+      )
+    : 0;
   return {
     ...r,
     porcentajeMes:

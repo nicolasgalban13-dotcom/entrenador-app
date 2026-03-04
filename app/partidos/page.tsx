@@ -12,11 +12,14 @@ export default function Partidos() {
     "lista" | "editar" | "convocatoria" | "verconvocatoria" | "stats" | "verstats"
   >("lista");
 
+  const [equipoTab, setEquipoTab] = useState<"Primera" | "Intermedia">("Primera");
+
   const [form, setForm] = useState({
     fecha: "",
     rival: "",
     condicion: "Local",
     tipo: "Amistoso",
+    equipo: "Primera",
   });
 
   const [convocatoria, setConvocatoria] = useState<any[]>([]);
@@ -41,6 +44,10 @@ export default function Partidos() {
     setPartidos(p || []);
     setJugadoras(j || []);
   }
+
+  const partidosFiltrados = partidos.filter(
+    (p) => (p.equipo || "Primera") === equipoTab
+  );
 
   function resultadoColor(p: any) {
     if (p.goles_favor > p.goles_contra) return "text-green-600 font-bold";
@@ -74,6 +81,7 @@ export default function Partidos() {
         rival: p.rival,
         condicion: p.condicion,
         tipo: p.tipo,
+        equipo: p.equipo || "Primera",
       });
     } else {
       setSeleccionado(null);
@@ -82,6 +90,7 @@ export default function Partidos() {
         rival: "",
         condicion: "Local",
         tipo: "Amistoso",
+        equipo: "Primera",
       });
     }
     setModo("editar");
@@ -132,7 +141,7 @@ export default function Partidos() {
   }
 
   async function toggleConvocada(jugadora_id: number) {
-    const existe = convocatoria.find(c => c.jugadora_id === jugadora_id);
+    const existe = convocatoria.find((c) => c.jugadora_id === jugadora_id);
 
     if (existe) {
       await supabase
@@ -183,10 +192,17 @@ export default function Partidos() {
 
     (convocadas || []).forEach((c: any) => {
       estructura[c.jugadora_id] = {
-        goles: (goles || []).filter(g => g.jugadora_id === c.jugadora_id).length,
-        verde: (tarjetas || []).filter(t => t.jugadora_id === c.jugadora_id && t.tipo === "Verde").length,
-        amarilla: (tarjetas || []).filter(t => t.jugadora_id === c.jugadora_id && t.tipo === "Amarilla").length,
-        roja: (tarjetas || []).filter(t => t.jugadora_id === c.jugadora_id && t.tipo === "Roja").length,
+        goles: (goles || []).filter((g) => g.jugadora_id === c.jugadora_id)
+          .length,
+        verde: (tarjetas || []).filter(
+          (t) => t.jugadora_id === c.jugadora_id && t.tipo === "Verde"
+        ).length,
+        amarilla: (tarjetas || []).filter(
+          (t) => t.jugadora_id === c.jugadora_id && t.tipo === "Amarilla"
+        ).length,
+        roja: (tarjetas || []).filter(
+          (t) => t.jugadora_id === c.jugadora_id && t.tipo === "Roja"
+        ).length,
       };
     });
 
@@ -218,494 +234,276 @@ export default function Partidos() {
   }
 
   async function guardarStats() {
-  if (!seleccionado) return;
+    if (!seleccionado) return;
 
-  // 1️⃣ Borramos registros anteriores
-  await supabase
-    .from("goles")
-    .delete()
-    .eq("partido_id", seleccionado.id);
+    await supabase.from("goles").delete().eq("partido_id", seleccionado.id);
 
-  await supabase
-    .from("tarjetas")
-    .delete()
-    .eq("partido_id", seleccionado.id);
+    await supabase.from("tarjetas").delete().eq("partido_id", seleccionado.id);
 
-  let totalGoles = 0;
+    let totalGoles = 0;
 
-  // 2️⃣ Insertamos nuevamente todo
-  for (const jugadora_id in stats) {
-    const s = stats[jugadora_id];
+    for (const jugadora_id in stats) {
+      const s = stats[jugadora_id];
 
-    // GOLES
-    for (let i = 0; i < s.goles; i++) {
-      await supabase.from("goles").insert({
-        partido_id: seleccionado.id,
-        jugadora_id: Number(jugadora_id),
-      });
+      for (let i = 0; i < s.goles; i++) {
+        await supabase.from("goles").insert({
+          partido_id: seleccionado.id,
+          jugadora_id: Number(jugadora_id),
+        });
+      }
+
+      for (let i = 0; i < s.verde; i++) {
+        await supabase.from("tarjetas").insert({
+          partido_id: seleccionado.id,
+          jugadora_id: Number(jugadora_id),
+          tipo: "Verde",
+        });
+      }
+
+      for (let i = 0; i < s.amarilla; i++) {
+        await supabase.from("tarjetas").insert({
+          partido_id: seleccionado.id,
+          jugadora_id: Number(jugadora_id),
+          tipo: "Amarilla",
+        });
+      }
+
+      for (let i = 0; i < s.roja; i++) {
+        await supabase.from("tarjetas").insert({
+          partido_id: seleccionado.id,
+          jugadora_id: Number(jugadora_id),
+          tipo: "Roja",
+        });
+      }
+
+      totalGoles += s.goles;
     }
 
-    // TARJETAS VERDES
-    for (let i = 0; i < s.verde; i++) {
-      await supabase.from("tarjetas").insert({
-        partido_id: seleccionado.id,
-        jugadora_id: Number(jugadora_id),
-        tipo: "Verde",
-      });
-    }
+    await supabase
+      .from("partidos")
+      .update({
+        goles_favor: totalGoles,
+        goles_contra: golesRival,
+      })
+      .eq("id", seleccionado.id);
 
-    // TARJETAS AMARILLAS
-    for (let i = 0; i < s.amarilla; i++) {
-      await supabase.from("tarjetas").insert({
-        partido_id: seleccionado.id,
-        jugadora_id: Number(jugadora_id),
-        tipo: "Amarilla",
-      });
-    }
-
-    // TARJETAS ROJAS
-    for (let i = 0; i < s.roja; i++) {
-      await supabase.from("tarjetas").insert({
-        partido_id: seleccionado.id,
-        jugadora_id: Number(jugadora_id),
-        tipo: "Roja",
-      });
-    }
-
-    totalGoles += s.goles;
+    setModo("lista");
+    cargarTodo();
   }
 
-  // 3️⃣ Actualizamos marcador
-  await supabase
-    .from("partidos")
-    .update({
-      goles_favor: totalGoles,
-      goles_contra: golesRival,
-    })
-    .eq("id", seleccionado.id);
-
-  setModo("lista");
-  cargarTodo();
-}
-
   return (
-  <main className="min-h-screen bg-gray-100 p-8">
-    <h1 className="text-3xl font-bold mb-6">Gestión de Partidos</h1>
+    <main className="min-h-screen bg-gray-100 p-8">
+      <h1 className="text-3xl font-bold mb-6">Gestión de Partidos</h1>
 
-    {modo === "lista" && (
-  <>
-    <button
-      onClick={() => abrirEditar()}
-      className="bg-blue-600 text-white px-4 py-2 rounded mb-6"
-    >
-      Nuevo Partido
-    </button>
+      {modo === "lista" && (
+        <>
+          {/* TABS EQUIPO */}
 
-    {partidos.length === 0 && (
-      <div className="text-gray-500">
-        No hay partidos cargados.
-      </div>
-    )}
-
-    {partidos.map(p => (
-      <div
-  key={p.id}
-  className="bg-white p-4 rounded-xl shadow-md mb-3 flex justify-between items-center hover:shadow-lg transition"
->
-  <div>
-    <div className="text-sm text-gray-500">
-      {p.fecha}
-    </div>
-
-    <div className="text-lg font-semibold">
-      vs {p.rival}
-    </div>
-
-    <div className="text-sm text-gray-600 flex items-center gap-2">
-      <span>{p.condicion}</span>
-
-      <span
-        className={`px-2 py-1 rounded text-xs ${
-          p.tipo === "Oficial"
-            ? "bg-red-100 text-red-700"
-            : "bg-blue-100 text-blue-700"
-        }`}
-      >
-        {p.tipo}
-      </span>
-    </div>
-
-    <div className={`mt-1 ${resultadoColor(p)}`}>
-      {p.goles_favor} - {p.goles_contra} ({resultadoTexto(p)})
-    </div>
-  </div>
-
-  <div className="flex flex-wrap gap-2 text-xs">
-    <button
-      onClick={() => abrirEditar(p)}
-      className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-    >
-      Editar
-    </button>
-
-    <button
-      onClick={() => abrirConvocatoria(p)}
-      className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
-    >
-      Convocar
-    </button>
-
-    <button
-      onClick={() => abrirVerConvocatoria(p)}
-      className="px-3 py-1 bg-teal-100 text-teal-700 rounded hover:bg-teal-200"
-    >
-      Ver Conv.
-    </button>
-
-    <button
-      onClick={() => abrirStats(p)}
-      className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-    >
-      Editar Stats
-    </button>
-
-    <button
-      onClick={() => abrirVerStats(p)}
-      className="px-3 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
-    >
-      Ver Stats
-    </button>
-
-    <button
-      onClick={() => eliminarPartido(p)}
-      className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-    >
-      Eliminar
-    </button>
-  </div>
-</div>
-    ))}
-  </>
-)}
-
-    {modo === "editar" && (
-  <div className="bg-white p-6 rounded shadow space-y-4 max-w-xl">
-    <h2 className="text-xl font-bold">
-      {seleccionado ? "Editar Partido" : "Nuevo Partido"}
-    </h2>
-
-    <div>
-      <label className="block font-semibold mb-1">Fecha</label>
-      <input
-        type="date"
-        value={form.fecha}
-        onChange={(e) =>
-          setForm({ ...form, fecha: e.target.value })
-        }
-        className="border p-2 w-full rounded"
-      />
-    </div>
-
-    <div>
-      <label className="block font-semibold mb-1">Rival</label>
-      <input
-        type="text"
-        value={form.rival}
-        onChange={(e) =>
-          setForm({ ...form, rival: e.target.value })
-        }
-        className="border p-2 w-full rounded"
-      />
-    </div>
-
-    <div>
-      <label className="block font-semibold mb-1">Condición</label>
-      <select
-        value={form.condicion}
-        onChange={(e) =>
-          setForm({ ...form, condicion: e.target.value })
-        }
-        className="border p-2 w-full rounded"
-      >
-        <option value="Local">Local</option>
-        <option value="Visitante">Visitante</option>
-      </select>
-    </div>
-
-    <div>
-      <label className="block font-semibold mb-1">Tipo</label>
-      <select
-        value={form.tipo}
-        onChange={(e) =>
-          setForm({ ...form, tipo: e.target.value })
-        }
-        className="border p-2 w-full rounded"
-      >
-        <option value="Amistoso">Amistoso</option>
-        <option value="Oficial">Oficial</option>
-      </select>
-    </div>
-
-    <div className="flex gap-3">
-      <button
-        onClick={guardarPartido}
-        className="bg-green-600 text-white px-4 py-2 rounded"
-      >
-        Guardar
-      </button>
-
-      <button
-        onClick={() => setModo("lista")}
-        className="bg-gray-500 text-white px-4 py-2 rounded"
-      >
-        Cancelar
-      </button>
-    </div>
-  </div>
-)}
-
-    {modo === "convocatoria" && seleccionado && (
-  <div className="bg-white p-6 rounded shadow space-y-4 max-w-2xl">
-    <h2 className="text-xl font-bold">
-      Convocatoria - {seleccionado.rival}
-    </h2>
-
-    {jugadoras.map((j) => {
-      const registro = convocatoria.find(
-        (c) => c.jugadora_id === j.id
-      );
-
-      return (
-        <div
-          key={j.id}
-          className="flex justify-between items-center border-b pb-2"
-        >
-          <span>{j.nombre}</span>
-
-          <div className="flex items-center gap-4">
+          <div className="flex gap-3 mb-6">
             <button
-              onClick={() => toggleConvocada(j.id)}
-              className={`px-3 py-1 rounded ${
-                registro
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-300"
+              onClick={() => setEquipoTab("Primera")}
+              className={`px-4 py-2 rounded ${
+                equipoTab === "Primera"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200"
               }`}
             >
-              {registro ? "Convocada" : "No convocada"}
+              Primera
             </button>
 
-            {registro && (
-              <label className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  checked={registro.titular}
-                  onChange={() =>
-                    toggleTitular(
-                      j.id,
-                      registro.titular
-                    )
-                  }
-                />
-                <span>Titular</span>
-              </label>
-            )}
+            <button
+              onClick={() => setEquipoTab("Intermedia")}
+              className={`px-4 py-2 rounded ${
+                equipoTab === "Intermedia"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200"
+              }`}
+            >
+              Intermedia
+            </button>
           </div>
-        </div>
-      );
-    })}
 
-    <div className="flex gap-3 pt-4">
-      <button
-        onClick={() => setModo("lista")}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Confirmar
-      </button>
+          <button
+            onClick={() => abrirEditar()}
+            className="bg-blue-600 text-white px-4 py-2 rounded mb-6"
+          >
+            Nuevo Partido
+          </button>
 
-      <button
-        onClick={() => setModo("lista")}
-        className="bg-gray-500 text-white px-4 py-2 rounded"
-      >
-        Cancelar
-      </button>
-    </div>
-  </div>
-)}
+          {partidosFiltrados.length === 0 && (
+            <div className="text-gray-500">No hay partidos cargados.</div>
+          )}
 
-    {modo === "verconvocatoria" && seleccionado && (
-  <div className="bg-white p-6 rounded shadow space-y-4 max-w-2xl">
-    <h2 className="text-xl font-bold">
-      Convocatoria - {seleccionado.rival}
-    </h2>
+          {partidosFiltrados.map((p) => (
+            <div
+              key={p.id}
+              className="bg-white p-4 rounded-xl shadow-md mb-3 flex justify-between items-center hover:shadow-lg transition"
+            >
+              <div>
+                <div className="text-sm text-gray-500">{p.fecha}</div>
 
-    {convocatoria.length === 0 && (
-      <div className="text-gray-500">
-        No hay jugadoras convocadas.
-      </div>
-    )}
+                <div className="text-lg font-semibold">vs {p.rival}</div>
 
-    {convocatoria.map((c: any) => (
-      <div
-        key={c.jugadora_id}
-        className="flex justify-between border-b pb-2"
-      >
-        <span>{c.jugadoras?.nombre}</span>
+                <div className="text-xs bg-purple-100 text-purple-700 inline-block px-2 py-1 rounded mt-1">
+                  {p.equipo || "Primera"}
+                </div>
 
-        {c.titular && (
-          <span className="text-green-600 font-semibold">
-            Titular
-          </span>
-        )}
-      </div>
-    ))}
+                <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                  <span>{p.condicion}</span>
 
-    <button
-      onClick={() => setModo("lista")}
-      className="bg-gray-500 text-white px-4 py-2 rounded"
-    >
-      Volver
-    </button>
-  </div>
-)}
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      p.tipo === "Oficial"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {p.tipo}
+                  </span>
+                </div>
 
-    {modo === "stats" && seleccionado && (
-  <div className="bg-white p-6 rounded shadow space-y-6 max-w-3xl">
-    <h2 className="text-xl font-bold">
-      Editar Estadísticas - {seleccionado.rival}
-    </h2>
-
-    <div>
-      <label className="font-semibold mr-2">
-        Goles del rival:
-      </label>
-      <input
-        type="number"
-        value={golesRival}
-        onChange={(e) =>
-          setGolesRival(Number(e.target.value))
-        }
-        className="border p-2 w-20 rounded"
-      />
-    </div>
-
-    {convocatoria.length === 0 && (
-      <div className="text-gray-500">
-        No hay jugadoras convocadas.
-      </div>
-    )}
-
-    {convocatoria.map((c: any) => {
-      const datos = stats[c.jugadora_id] || {
-        goles: 0,
-        verde: 0,
-        amarilla: 0,
-        roja: 0,
-      };
-
-      return (
-        <div
-          key={c.jugadora_id}
-          className="border p-4 rounded space-y-2"
-        >
-          <strong>{c.jugadoras?.nombre}</strong>
-
-          <div className="flex flex-wrap gap-6 mt-2">
-            {["goles", "verde", "amarilla", "roja"].map((campo) => (
-              <div key={campo}>
-                <label className="capitalize mr-2">
-                  {campo}:
-                </label>
-                <input
-                  type="number"
-                  value={datos[campo]}
-                  onChange={(e) =>
-                    setStats({
-                      ...stats,
-                      [c.jugadora_id]: {
-                        ...datos,
-                        [campo]: Number(e.target.value),
-                      },
-                    })
-                  }
-                  className="border p-1 w-16 rounded"
-                />
+                <div className={`mt-1 ${resultadoColor(p)}`}>
+                  {p.goles_favor} - {p.goles_contra} ({resultadoTexto(p)})
+                </div>
               </div>
-            ))}
+
+              <div className="flex flex-wrap gap-2 text-xs">
+                <button
+                  onClick={() => abrirEditar(p)}
+                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                >
+                  Editar
+                </button>
+
+                <button
+                  onClick={() => abrirConvocatoria(p)}
+                  className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                >
+                  Convocar
+                </button>
+
+                <button
+                  onClick={() => abrirVerConvocatoria(p)}
+                  className="px-3 py-1 bg-teal-100 text-teal-700 rounded hover:bg-teal-200"
+                >
+                  Ver Conv.
+                </button>
+
+                <button
+                  onClick={() => abrirStats(p)}
+                  className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                >
+                  Editar Stats
+                </button>
+
+                <button
+                  onClick={() => abrirVerStats(p)}
+                  className="px-3 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+                >
+                  Ver Stats
+                </button>
+
+                <button
+                  onClick={() => eliminarPartido(p)}
+                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {modo === "editar" && (
+        <div className="bg-white p-6 rounded shadow space-y-4 max-w-xl">
+          <h2 className="text-xl font-bold">
+            {seleccionado ? "Editar Partido" : "Nuevo Partido"}
+          </h2>
+
+          <div>
+            <label className="block font-semibold mb-1">Fecha</label>
+            <input
+              type="date"
+              value={form.fecha}
+              onChange={(e) =>
+                setForm({ ...form, fecha: e.target.value })
+              }
+              className="border p-2 w-full rounded"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-1">Rival</label>
+            <input
+              type="text"
+              value={form.rival}
+              onChange={(e) =>
+                setForm({ ...form, rival: e.target.value })
+              }
+              className="border p-2 w-full rounded"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-1">Condición</label>
+            <select
+              value={form.condicion}
+              onChange={(e) =>
+                setForm({ ...form, condicion: e.target.value })
+              }
+              className="border p-2 w-full rounded"
+            >
+              <option value="Local">Local</option>
+              <option value="Visitante">Visitante</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-1">Tipo</label>
+            <select
+              value={form.tipo}
+              onChange={(e) =>
+                setForm({ ...form, tipo: e.target.value })
+              }
+              className="border p-2 w-full rounded"
+            >
+              <option value="Amistoso">Amistoso</option>
+              <option value="Oficial">Oficial</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-1">Equipo</label>
+            <select
+              value={form.equipo}
+              onChange={(e) =>
+                setForm({ ...form, equipo: e.target.value })
+              }
+              className="border p-2 w-full rounded"
+            >
+              <option value="Primera">Primera</option>
+              <option value="Intermedia">Intermedia</option>
+            </select>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={guardarPartido}
+              className="bg-green-600 text-white px-4 py-2 rounded"
+            >
+              Guardar
+            </button>
+
+            <button
+              onClick={() => setModo("lista")}
+              className="bg-gray-500 text-white px-4 py-2 rounded"
+            >
+              Cancelar
+            </button>
           </div>
         </div>
-      );
-    })}
-
-    <div className="flex gap-3">
-      <button
-        onClick={guardarStats}
-        className="bg-green-600 text-white px-4 py-2 rounded"
-      >
-        Guardar
-      </button>
-
-      <button
-        onClick={() => setModo("lista")}
-        className="bg-gray-500 text-white px-4 py-2 rounded"
-      >
-        Cancelar
-      </button>
-    </div>
-  </div>
-)}
-
-    {modo === "verstats" && seleccionado && (
-  <div className="bg-white p-6 rounded shadow space-y-6 max-w-2xl">
-    <h2 className="text-xl font-bold">
-      Estadísticas - {seleccionado.rival}
-    </h2>
-
-    <div>
-      <strong>Resultado:</strong>{" "}
-      {seleccionado.goles_favor} - {seleccionado.goles_contra}
-    </div>
-
-    <div>
-      <h3 className="font-semibold mt-4">Goles</h3>
-
-      {stats.goles?.length === 0 && (
-        <div className="text-gray-500">
-          No se registraron goles.
-        </div>
       )}
-
-      {stats.goles?.map((g: any) => (
-        <div key={g.id}>
-          ⚽ {g.jugadoras?.nombre}
-        </div>
-      ))}
-    </div>
-
-    <div>
-      <h3 className="font-semibold mt-4">Tarjetas</h3>
-
-      {stats.tarjetas?.length === 0 && (
-        <div className="text-gray-500">
-          No se registraron tarjetas.
-        </div>
-      )}
-
-      {stats.tarjetas?.map((t: any) => (
-        <div key={t.id}>
-          {t.tipo} — {t.jugadoras?.nombre}
-        </div>
-      ))}
-    </div>
-
-    <button
-      onClick={() => setModo("lista")}
-      className="bg-gray-500 text-white px-4 py-2 rounded"
-    >
-      Volver
-    </button>
-  </div>
-)}
-  </main>
-);
-
+    </main>
+  );
 }
