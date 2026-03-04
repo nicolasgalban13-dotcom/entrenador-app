@@ -608,23 +608,35 @@ className="border p-3 rounded mb-3"
 
 <div className="flex gap-4 mt-2">
 
-{["goles","verde","amarilla","roja"].map((campo) => (
+{[
+{ key: "goles", label: "⚽ Goles" },
+{ key: "verde", label: "🟩 Verde" },
+{ key: "amarilla", label: "🟨 Amarilla" },
+{ key: "roja", label: "🟥 Roja" }
+].map((campo) => (
+
+<div key={campo.key} className="flex flex-col items-center">
+
+<label className="text-xs font-semibold mb-1">
+{campo.label}
+</label>
 
 <input
-key={campo}
 type="number"
-value={datos[campo]}
+value={datos[campo.key]}
 onChange={(e) =>
 setStats({
 ...stats,
 [c.jugadora_id]: {
 ...datos,
-[campo]: Number(e.target.value)
+[campo.key]: Number(e.target.value)
 }
 })
 }
-className="border p-1 w-16 rounded"
+className="border p-1 w-16 rounded text-center"
 />
+
+</div>
 
 ))}
 
