@@ -724,6 +724,152 @@ Volver
 </div>
 
 )}
+{modo === "editar" && (
+
+<div className="bg-white p-6 rounded shadow space-y-4 max-w-xl">
+
+<h2 className="text-xl font-bold">
+{seleccionado ? "Editar Partido" : "Nuevo Partido"}
+</h2>
+
+<div>
+<label className="block font-semibold mb-1">
+Fecha
+</label>
+
+<input
+type="date"
+value={form.fecha}
+onChange={(e) =>
+setForm({
+...form,
+fecha: e.target.value
+})
+}
+className="border p-2 w-full rounded"
+/>
+</div>
+
+<div>
+<label className="block font-semibold mb-1">
+Rival
+</label>
+
+<input
+type="text"
+value={form.rival}
+onChange={(e) =>
+setForm({
+...form,
+rival: e.target.value
+})
+}
+className="border p-2 w-full rounded"
+/>
+</div>
+
+<div>
+<label className="block font-semibold mb-1">
+Condición
+</label>
+
+<select
+value={form.condicion}
+onChange={(e) =>
+setForm({
+...form,
+condicion: e.target.value
+})
+}
+className="border p-2 w-full rounded"
+>
+
+<option value="Local">
+Local
+</option>
+
+<option value="Visitante">
+Visitante
+</option>
+
+</select>
+</div>
+
+<div>
+<label className="block font-semibold mb-1">
+Tipo
+</label>
+
+<select
+value={form.tipo}
+onChange={(e) =>
+setForm({
+...form,
+tipo: e.target.value
+})
+}
+className="border p-2 w-full rounded"
+>
+
+<option value="Amistoso">
+Amistoso
+</option>
+
+<option value="Oficial">
+Oficial
+</option>
+
+</select>
+</div>
+
+<div>
+<label className="block font-semibold mb-1">
+Equipo
+</label>
+
+<select
+value={form.equipo}
+onChange={(e) =>
+setForm({
+...form,
+equipo: e.target.value
+})
+}
+className="border p-2 w-full rounded"
+>
+
+<option value="Primera">
+Primera
+</option>
+
+<option value="Intermedia">
+Intermedia
+</option>
+
+</select>
+</div>
+
+<div className="flex gap-3">
+
+<button
+onClick={guardarPartido}
+className="bg-green-600 text-white px-4 py-2 rounded"
+>
+Guardar
+</button>
+
+<button
+onClick={() => setModo("lista")}
+className="bg-gray-500 text-white px-4 py-2 rounded"
+>
+Cancelar
+</button>
+
+</div>
+
+</div>
+
+)}
 
 </main>
 
