@@ -462,6 +462,257 @@ Eliminar
 
 )}
 
+{/* CONVOCATORIA */}
+
+{modo === "convocatoria" && seleccionado && (
+
+<div className="bg-white p-6 rounded shadow max-w-2xl">
+
+<h2 className="text-xl font-bold mb-4">
+Convocatoria - {seleccionado.rival}
+</h2>
+
+{jugadoras.map((j) => {
+
+const registro = convocatoria.find(
+(c) => c.jugadora_id === j.id
+);
+
+return (
+
+<div
+key={j.id}
+className="flex justify-between border-b py-2"
+>
+
+<span>{j.nombre}</span>
+
+<button
+onClick={() => toggleConvocada(j.id)}
+className={`px-3 py-1 rounded ${
+registro
+? "bg-green-500 text-white"
+: "bg-gray-300"
+}`}
+>
+
+{registro ? "Convocada" : "No convocada"}
+
+</button>
+
+</div>
+
+);
+
+})}
+
+<button
+onClick={() => setModo("lista")}
+className="mt-4 bg-gray-500 text-white px-4 py-2 rounded"
+>
+
+Volver
+
+</button>
+
+</div>
+
+)}
+
+{/* VER CONVOCATORIA */}
+
+{modo === "verconvocatoria" && seleccionado && (
+
+<div className="bg-white p-6 rounded shadow max-w-2xl">
+
+<h2 className="text-xl font-bold mb-4">
+Convocatoria - {seleccionado.rival}
+</h2>
+
+{convocatoria.map((c: any) => (
+
+<div
+key={c.jugadora_id}
+className="border-b py-2 flex justify-between"
+>
+
+<span>{c.jugadoras?.nombre}</span>
+
+{c.titular && (
+<span className="text-green-600 font-semibold">
+Titular
+</span>
+)}
+
+</div>
+
+))}
+
+<button
+onClick={() => setModo("lista")}
+className="mt-4 bg-gray-500 text-white px-4 py-2 rounded"
+>
+
+Volver
+
+</button>
+
+</div>
+
+)}
+
+{/* EDITAR STATS */}
+
+{modo === "stats" && seleccionado && (
+
+<div className="bg-white p-6 rounded shadow max-w-3xl">
+
+<h2 className="text-xl font-bold mb-4">
+Editar Estadísticas - {seleccionado.rival}
+</h2>
+
+<div className="mb-4">
+
+<label className="font-semibold mr-2">
+Goles del rival
+</label>
+
+<input
+type="number"
+value={golesRival}
+onChange={(e) =>
+setGolesRival(Number(e.target.value))
+}
+className="border p-2 w-20 rounded"
+/>
+
+</div>
+
+{convocatoria.map((c: any) => {
+
+const datos = stats[c.jugadora_id] || {
+goles: 0,
+verde: 0,
+amarilla: 0,
+roja: 0,
+};
+
+return (
+
+<div
+key={c.jugadora_id}
+className="border p-3 rounded mb-3"
+>
+
+<strong>{c.jugadoras?.nombre}</strong>
+
+<div className="flex gap-4 mt-2">
+
+{["goles","verde","amarilla","roja"].map((campo) => (
+
+<input
+key={campo}
+type="number"
+value={datos[campo]}
+onChange={(e) =>
+setStats({
+...stats,
+[c.jugadora_id]: {
+...datos,
+[campo]: Number(e.target.value)
+}
+})
+}
+className="border p-1 w-16 rounded"
+/>
+
+))}
+
+</div>
+
+</div>
+
+);
+
+})}
+
+<div className="flex gap-3">
+
+<button
+onClick={guardarStats}
+className="bg-green-600 text-white px-4 py-2 rounded"
+>
+
+Guardar
+
+</button>
+
+<button
+onClick={() => setModo("lista")}
+className="bg-gray-500 text-white px-4 py-2 rounded"
+>
+
+Cancelar
+
+</button>
+
+</div>
+
+</div>
+
+)}
+
+{/* VER STATS */}
+
+{modo === "verstats" && seleccionado && (
+
+<div className="bg-white p-6 rounded shadow max-w-2xl">
+
+<h2 className="text-xl font-bold mb-4">
+Estadísticas - {seleccionado.rival}
+</h2>
+
+<div className="mb-4">
+Resultado: {seleccionado.goles_favor} - {seleccionado.goles_contra}
+</div>
+
+<div className="mb-4">
+
+<h3 className="font-semibold">Goles</h3>
+
+{stats.goles?.map((g: any) => (
+<div key={g.id}>
+⚽ {g.jugadoras?.nombre}
+</div>
+))}
+
+</div>
+
+<div>
+
+<h3 className="font-semibold">Tarjetas</h3>
+
+{stats.tarjetas?.map((t: any) => (
+<div key={t.id}>
+{t.tipo} — {t.jugadoras?.nombre}
+</div>
+))}
+
+</div>
+
+<button
+onClick={() => setModo("lista")}
+className="mt-4 bg-gray-500 text-white px-4 py-2 rounded"
+>
+
+Volver
+
+</button>
+
+</div>
+
+)}
+
 </main>
 
 );
