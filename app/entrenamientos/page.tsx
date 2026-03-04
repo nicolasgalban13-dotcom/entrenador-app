@@ -271,16 +271,16 @@ export default function Entrenamientos() {
                 <span>{j.nombre}</span>
 
                 <button
-                  disabled={seleccionado.tipo === "Libre"}
-                  onClick={() => toggleAsistencia(j.id)}
-                  className={`px-4 py-1 rounded text-white ${
-                    asistencias[j.id]
-                      ? "bg-green-600"
-                      : "bg-red-600"
-                  }`}
-                >
-                  {asistencias[j.id] ? "Presente" : "Ausente"}
-                </button>
+  disabled={seleccionado.tipo === "Libre"}
+  onClick={() => toggleAsistencia(j.id)}
+  className={`px-4 py-1 rounded text-white transition ${
+    asistencias[j.id] === true
+  ? "bg-green-600 hover:bg-green-700"
+  : "bg-red-600 hover:bg-red-700"
+  }`}
+>
+  {asistencias[j.id] === true ? "Presente" : "Ausente"}
+</button>
               </div>
             ))}
           </div>

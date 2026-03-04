@@ -104,12 +104,9 @@ export default function Asistencias() {
       (r: any) => ({
         ...r,
         porcentajeMes:
-          r.totalMes > 0
-            ? Math.round(
-                (r.presentesMes / r.totalMes) *
-                  100
-              )
-            : 0,
+  entrenosOrdenados.length > 0
+    ? Math.round((r.presentesMes / entrenosOrdenados.length) * 100)
+    : 0,
         porcentajeGeneral:
           r.totalGeneral > 0
             ? Math.round(
