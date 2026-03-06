@@ -194,37 +194,62 @@ minutos:0
 function generarInforme(){
 
 const pdf = new jsPDF()
-
-let y = 20
-
 const golesFavor = goles.length
 const golesContra = golesRival.length
 
-// TITULO
+let y = 20
 
-pdf.setFontSize(22)
-pdf.text(`BDSC vs ${rival}`,105,y,{align:"center"})
+pdf.setFont("Helvetica","bold")
+pdf.setFontSize(14)
 
-y += 12
-
-// RESULTADO GRANDE
-
-pdf.setFontSize(40)
-pdf.text(`${golesFavor} - ${golesContra}`,105,y,{align:"center"})
-
-y += 20
-
-// GOLES
-
-pdf.setFontSize(16)
-pdf.text("⚽ Goles",20,y)
+pdf.text("GOLES",20,y)
+pdf.line(20,y+1,50,y+1)
 
 y += 8
 
-if(goles.length === 0){
+pdf.setFont("Helvetica","normal")
+
+goles.forEach(g=>{
+
+const nombre = jugadoras.find(j=>j.id===g.jugadora)?.nombre || ""
+
+pdf.text(`${nombre} (${g.tipo})`,20,y)
+
+y+=6
+
+})
+// HEADER COLOR
+
+pdf.setFillColor(30,64,175)
+pdf.rect(0,0,210,35,"F")
+
+pdf.setTextColor(255,255,255)
+pdf.setFontSize(20)
+pdf.text(`BDSC vs ${rival}`,105,15,{align:"center"})
+
+pdf.setFontSize(36)
+pdf.text(`${golesFavor} - ${golesContra}`,105,30,{align:"center"})
+
+
+y = 50
+
+pdf.setTextColor(0,0,0)
+
+
+// GOLES
+
+pdf.setFillColor(230,240,255)
+pdf.rect(15,y-6,180,10,"F")
+
+pdf.setFontSize(16)
+pdf.text("GOLES",20,y)
+
+y += 10
+
+if(goles.length===0){
 
 pdf.text("Sin goles",20,y)
-y += 6
+y+=6
 
 }
 
@@ -234,22 +259,27 @@ const nombre = jugadoras.find(j=>j.id===g.jugadora)?.nombre || ""
 
 pdf.text(`${nombre} (${g.tipo})`,20,y)
 
-y += 6
+y+=6
 
 })
 
-y += 10
+y+=10
+
 
 // TARJETAS
 
-pdf.text("🟨 Tarjetas",20,y)
+pdf.setFillColor(255,245,200)
+pdf.rect(15,y-6,180,10,"F")
 
-y += 8
+pdf.setFontSize(16)
+pdf.text("TARJETAS",20,y)
 
-if(tarjetas.length === 0){
+y+=10
+
+if(tarjetas.length===0){
 
 pdf.text("Sin tarjetas",20,y)
-y += 6
+y+=6
 
 }
 
@@ -259,37 +289,46 @@ const nombre = jugadoras.find(j=>j.id===t.jugadora)?.nombre || ""
 
 pdf.text(`${nombre} (${t.tipo})`,20,y)
 
-y += 6
+y+=6
 
 })
 
-y += 10
+y+=10
+
 
 // CORNERS
 
+pdf.setFillColor(230,255,230)
+pdf.rect(15,y-6,180,10,"F")
+
 pdf.text("Corners Cortos",20,y)
 
-y += 8
+y+=10
 
 let cornersFavor = cornersPropios.reduce((a,b)=>a+b,0)
 let cornersContra = cornersRival.reduce((a,b)=>a+b,0)
 
 pdf.text(`BDSC ${cornersFavor} - ${cornersContra} Rival`,20,y)
 
-y += 10
+y+=10
 
-// INGRESOS AL AREA
+
+// INGRESOS AREA
+
+pdf.setFillColor(240,240,240)
+pdf.rect(15,y-6,180,10,"F")
 
 pdf.text("Ingresos al Área",20,y)
 
-y += 8
+y+=10
 
 let areasFavor = areasPropias.reduce((a,b)=>a+b,0)
 let areasContra = areasRival.reduce((a,b)=>a+b,0)
 
 pdf.text(`BDSC ${areasFavor} - ${areasContra} Rival`,20,y)
 
-pdf.save("informe_partido.pdf")
+
+pdf.save(`BDSC_vs_${rival}.pdf`)
 
 }
 

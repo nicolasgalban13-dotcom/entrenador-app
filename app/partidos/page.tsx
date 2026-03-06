@@ -349,21 +349,32 @@ async function descargarResumenPartido() {
     return
   }
 
-  // esperar a que el DOM termine de renderizar
-  await new Promise(resolve => setTimeout(resolve, 200))
-
-  const canvas = await html2canvas(elemento, {
-    backgroundColor: null,
-    scale: 2
+  const canvas = await html2canvas(elemento,{
+    scale:2,
+    backgroundColor:null,
+    useCORS:true
   })
 
-  const link = document.createElement("a")
-  link.download = `BDSC_vs_${seleccionado.rival}.png`
-  link.href = canvas.toDataURL("image/png")
+  canvas.toBlob((blob)=>{
 
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+    if(!blob){
+      alert("Error generando imagen")
+      return
+    }
+
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `BDSC_vs_${seleccionado.rival}.png`
+
+    document.body.appendChild(link)
+    link.click()
+
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+  })
 
 }
 
@@ -390,19 +401,29 @@ async function descargarConvocatoria() {
 
   const elemento = document.getElementById("convocatoria-export");
 
-  if (!elemento) return;
+  if (!elemento) {
+    alert("No se encontró la convocatoria");
+    return;
+  }
 
-  const canvas = await html2canvas(elemento);
+  // Esperar un frame para asegurar render completo
+  await new Promise((r) => requestAnimationFrame(r));
+
+  const canvas = await html2canvas(elemento, {
+    scale: 2,
+    backgroundColor: "#92eb8a",
+    useCORS: true,
+    scrollY: -window.scrollY
+  });
 
   const link = document.createElement("a");
+  link.download = `convocatoria_${seleccionado?.rival || "partido"}.png`;
+  link.href = canvas.toDataURL("image/png");
 
-  link.download = "convocatoria.png";
-  link.href = canvas.toDataURL();
-
+  document.body.appendChild(link);
   link.click();
-
+  document.body.removeChild(link);
 }
-
 return (
 
 <main className="min-h-screen bg-gray-100 p-8">
@@ -804,7 +825,7 @@ Cancelar
 
 <div
 id="resumen-partido"
-className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white p-10 rounded-2xl w-[1080px] h-[1080px] shadow-xl flex flex-col justify-center items-center text-center"
+className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white p-10 rounded-2xl w-[500px] h-[500px] shadow-xl flex flex-col justify-center items-center text-center"
 >
 
 <img
