@@ -342,18 +342,28 @@ cargarTodo();
 
 async function descargarResumenPartido() {
 
-  const elemento = document.getElementById("resumen-partido");
+  const elemento = document.getElementById("resumen-partido")
 
-  if (!elemento) return;
+  if (!elemento) {
+    alert("No se encontró el resumen del partido")
+    return
+  }
 
-  const canvas = await html2canvas(elemento);
+  // esperar a que el DOM termine de renderizar
+  await new Promise(resolve => setTimeout(resolve, 200))
 
-  const link = document.createElement("a");
+  const canvas = await html2canvas(elemento, {
+    backgroundColor: null,
+    scale: 2
+  })
 
-  link.download = "resumen_partido.png";
-  link.href = canvas.toDataURL();
+  const link = document.createElement("a")
+  link.download = `BDSC_vs_${seleccionado.rival}.png`
+  link.href = canvas.toDataURL("image/png")
 
-  link.click();
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 
 }
 
@@ -794,71 +804,80 @@ Cancelar
 
 <div
 id="resumen-partido"
-className="bg-blue-900 text-white p-6 rounded-xl max-w-md shadow"
+className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white p-10 rounded-2xl w-[1080px] h-[1080px] shadow-xl flex flex-col justify-center items-center text-center"
 >
- 
- 
-<h2 className="text-center text-2xl font-bold mb-4">
+
+<img
+src="/escudo.png"
+className="w-20 mx-auto mb-4"
+/>
+
+<h2 className="text-xl font-semibold mb-2 opacity-90">
 Resultado del Partido
 </h2>
 
-<div className="text-center text-sm mb-2 opacity-80">
+<div className="text-sm mb-2 opacity-80">
 {seleccionado.tipo} • {seleccionado.equipo || "Primera"}
 </div>
 
-<div className="text-center text-lg mb-2">
+<div className="text-lg mb-2">
 BDSC vs {seleccionado.rival}
 </div>
 
-<div className="text-center text-3xl font-bold mb-4">
+<div className="text-6xl font-bold mb-6">
 {seleccionado.goles_favor} - {seleccionado.goles_contra}
 </div>
 
-<div className="mb-4">
+<div className="mb-6">
 
-<h3 className="font-semibold mb-2">
+<h3 className="font-semibold mb-2 text-lg">
 ⚽ Goleadoras
 </h3>
 
+{obtenerGoleadorasAgrupadas().length === 0 && (
+<div className="opacity-70">Sin goles</div>
+)}
+
 {obtenerGoleadorasAgrupadas().map(([nombre,cantidad]:any,i)=>(
-<div key={i}>
+
+<div key={i} className="text-lg">
 {"⚽".repeat(cantidad)} {nombre}
 </div>
+
 ))}
 
 </div>
 
-<div>
+<div className="mb-6">
 
-<h3 className="font-semibold mb-2">
+<h3 className="font-semibold mb-2 text-lg">
 🟥 Tarjetas
 </h3>
 
+{stats.tarjetas?.length === 0 && (
+<div className="opacity-70">Sin tarjetas</div>
+)}
+
 {stats.tarjetas?.map((t:any)=>(
+
 <div key={t.id}>
 {t.tipo} — {t.jugadoras?.nombre}
 </div>
-))}
 
-<button
-onClick={descargarResumenPartido}
-className="bg-green-600 text-white px-4 py-2 rounded mt-6 w-full"
->
-Descargar resumen del partido
-</button>
+))}
 
 </div>
 
 <button
 onClick={descargarResumenPartido}
-className="bg-green-600 text-white px-4 py-2 rounded mt-4"
+className="bg-green-600 text-white px-4 py-2 rounded mt-4 w-full hover:bg-green-700"
 >
 Descargar resumen del partido
 </button>
 
 <button
 onClick={() => setModo("lista")}
-className="mt-4 bg-gray-500 text-white px-4 py-2 rounded"
+className="mt-3 bg-gray-500 text-white px-4 py-2 rounded w-full"
 >
 
 Volver

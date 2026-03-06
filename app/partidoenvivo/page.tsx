@@ -195,106 +195,99 @@ function generarInforme(){
 
 const pdf = new jsPDF()
 
-let y=20
+let y = 20
 
-pdf.setFontSize(18)
-pdf.text("Informe del Partido",20,y)
+const golesFavor = goles.length
+const golesContra = golesRival.length
 
-y+=10
+// TITULO
 
-pdf.setFontSize(14)
-pdf.text(`Equipo: ${equipo}`,20,y)
-y+=8
-pdf.text(`Rival: ${rival}`,20,y)
-y+=8
-pdf.text(`Tipo: ${tipo}`,20,y)
+pdf.setFontSize(22)
+pdf.text(`BDSC vs ${rival}`,105,y,{align:"center"})
 
-y+=15
+y += 12
 
-pdf.setFontSize(14)
-pdf.text("Corners Cortos",20,y)
+// RESULTADO GRANDE
 
-y+=8
+pdf.setFontSize(40)
+pdf.text(`${golesFavor} - ${golesContra}`,105,y,{align:"center"})
 
-for(let i=0;i<4;i++){
+y += 20
 
-pdf.text(`Cuarto ${i+1}: ${cornersPropios[i]} - ${cornersRival[i]}`,20,y)
-y+=6
+// GOLES
 
-}
+pdf.setFontSize(16)
+pdf.text("⚽ Goles",20,y)
 
-y+=10
+y += 8
 
-pdf.text("Ingresos al Área",20,y)
+if(goles.length === 0){
 
-y+=8
-
-for(let i=0;i<4;i++){
-
-pdf.text(`Cuarto ${i+1}: ${areasPropias[i]} - ${areasRival[i]}`,20,y)
-y+=6
+pdf.text("Sin goles",20,y)
+y += 6
 
 }
-
-y+=10
-
-pdf.text("Goles",20,y)
-
-y+=8
 
 goles.forEach(g=>{
 
 const nombre = jugadoras.find(j=>j.id===g.jugadora)?.nombre || ""
 
-pdf.text(`Q${g.cuarto} - ${nombre} (${g.tipo})`,20,y)
+pdf.text(`${nombre} (${g.tipo})`,20,y)
 
-y+=6
-
-})
-
-y+=10
-
-pdf.text("Goles Rival",20,y)
-
-y+=8
-
-golesRival.forEach(g=>{
-
-pdf.text(`Q${g.cuarto} - (${g.tipo})`,20,y)
-
-y+=6
+y += 6
 
 })
 
-y+=10
+y += 10
 
-pdf.text("Tarjetas",20,y)
+// TARJETAS
 
-y+=8
+pdf.text("🟨 Tarjetas",20,y)
+
+y += 8
+
+if(tarjetas.length === 0){
+
+pdf.text("Sin tarjetas",20,y)
+y += 6
+
+}
 
 tarjetas.forEach(t=>{
 
 const nombre = jugadoras.find(j=>j.id===t.jugadora)?.nombre || ""
 
-pdf.text(`Q${t.cuarto} - ${nombre} ${t.tipo}`,20,y)
+pdf.text(`${nombre} (${t.tipo})`,20,y)
 
-y+=6
-
-})
-
-y+=10
-
-pdf.text("Tarjetas Rival",20,y)
-
-y+=8
-
-tarjetasRival.forEach(t=>{
-
-pdf.text(`Q${t.cuarto} - ${t.tipo}`,20,y)
-
-y+=6
+y += 6
 
 })
+
+y += 10
+
+// CORNERS
+
+pdf.text("Corners Cortos",20,y)
+
+y += 8
+
+let cornersFavor = cornersPropios.reduce((a,b)=>a+b,0)
+let cornersContra = cornersRival.reduce((a,b)=>a+b,0)
+
+pdf.text(`BDSC ${cornersFavor} - ${cornersContra} Rival`,20,y)
+
+y += 10
+
+// INGRESOS AL AREA
+
+pdf.text("Ingresos al Área",20,y)
+
+y += 8
+
+let areasFavor = areasPropias.reduce((a,b)=>a+b,0)
+let areasContra = areasRival.reduce((a,b)=>a+b,0)
+
+pdf.text(`BDSC ${areasFavor} - ${areasContra} Rival`,20,y)
 
 pdf.save("informe_partido.pdf")
 
