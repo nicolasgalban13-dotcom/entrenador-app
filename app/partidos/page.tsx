@@ -340,27 +340,17 @@ setModo("lista");
 cargarTodo();
 }
 
-async function descargarResumenPartido() {
-
-console.log("CLICK DESCARGAR")
-
-alert("Intentando descargar")
+async function descargarResumenPartido(){
 
 const elemento = document.getElementById("resumen-partido")
 
-if(!elemento){
-alert("No se encontró el resumen")
-return
-}
+if(!elemento) return
 
-const canvas = await html2canvas(elemento)
+const canvas = await html2canvas(elemento,{scale:3})
 
-const link = document.createElement("a")
+const imagen = canvas.toDataURL("image/png")
 
-link.download = "resumen.png"
-link.href = canvas.toDataURL()
-
-link.click()
+window.open(imagen)
 
 }
 
