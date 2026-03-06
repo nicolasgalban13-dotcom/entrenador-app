@@ -342,14 +342,20 @@ cargarTodo();
 
 async function descargarResumenPartido(){
 
+alert("funcion ejecutada")
+
 const elemento = document.getElementById("resumen-partido")
 
+console.log(elemento)
+
 if(!elemento){
-alert("No existe el elemento")
+alert("no encontro el elemento")
 return
 }
 
 const canvas = await html2canvas(elemento)
+
+alert("canvas generado")
 
 document.body.appendChild(canvas)
 
