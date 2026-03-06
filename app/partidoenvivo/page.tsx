@@ -301,7 +301,9 @@ pdf.save("informe_partido.pdf")
 
 async function finalizarPartido(){
 
-const {data:partido} = await supabase
+try{
+
+const { data:partido, error } = await supabase
 .from("partidos")
 .insert({
 
@@ -316,7 +318,23 @@ goles_contra:golesRival.length
 .select()
 .single()
 
+if(error){
+
+console.log("Error creando partido:",error)
+alert("Error guardando partido")
+return
+
+}
+
+if(!partido){
+
+alert("No se pudo crear el partido")
+return
+
+}
+
 const partido_id = partido.id
+
 
 // guardar convocadas
 
@@ -334,9 +352,12 @@ titular:titulares.includes(j)
 
 }
 
+
 // guardar goles
 
 for(const g of goles){
+
+if(!g.jugadora) continue
 
 await supabase
 .from("goles")
@@ -349,9 +370,12 @@ jugadora_id:g.jugadora
 
 }
 
+
 // guardar tarjetas
 
 for(const t of tarjetas){
+
+if(!t.jugadora) continue
 
 await supabase
 .from("tarjetas")
@@ -365,11 +389,14 @@ tipo:t.tipo
 
 }
 
+
 // generar informe
 
 setTimeout(()=>{
 generarInforme()
 },300)
+
+
 // REINICIAR PARTIDO
 
 setSegundos(0)
@@ -393,6 +420,15 @@ setTimeline([])
 setRival("")
 setConvocadas([])
 setTitulares([])
+
+alert("Partido guardado")
+
+}catch(err){
+
+console.log("Error finalizando partido",err)
+alert("Error inesperado")
+
+}
 
 }
 return(

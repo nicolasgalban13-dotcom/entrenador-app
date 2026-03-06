@@ -51,6 +51,14 @@ export default function Home() {
           </div>
         </Link>
 
+        <Link href="/partidoenvivo">
+          <div className="bg-white p-6 rounded shadow hover:shadow-lg cursor-pointer text-center border-2 border-indigo-500">
+            <h2 className="text-xl font-semibold text-indigo-600">
+              Partido en Vivo
+            </h2>
+          </div>
+        </Link>
+
       </div>
     </main>
   );
