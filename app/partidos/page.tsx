@@ -340,17 +340,9 @@ setModo("lista");
 cargarTodo();
 }
 
-async function descargarResumenPartido(){
+async function descargarResumenPartido() {
 
-const elemento = document.getElementById("resumen-partido")
-
-if(!elemento) return
-
-const canvas = await html2canvas(elemento,{scale:3})
-
-const imagen = canvas.toDataURL("image/png")
-
-window.open(imagen)
+alert("FUNCION ACTIVADA")
 
 }
 
