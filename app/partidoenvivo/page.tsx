@@ -145,6 +145,8 @@ tipo:"jugada"
 }
 ])
 
+registrarEvento("Gol BDSC")
+
 }
 
 function agregarGolRival(){
@@ -156,6 +158,8 @@ cuarto,
 tipo:"jugada"
 }
 ])
+
+registrarEvento("Gol RIVAL")
 
 }
 
@@ -363,7 +367,32 @@ tipo:t.tipo
 
 // generar informe
 
+setTimeout(()=>{
 generarInforme()
+},300)
+// REINICIAR PARTIDO
+
+setSegundos(0)
+setCorriendo(false)
+setCuarto(1)
+
+setCornersPropios([0,0,0,0])
+setCornersRival([0,0,0,0])
+
+setAreasPropias([0,0,0,0])
+setAreasRival([0,0,0,0])
+
+setGoles([])
+setGolesRival([])
+
+setTarjetas([])
+setTarjetasRival([])
+
+setTimeline([])
+
+setRival("")
+setConvocadas([])
+setTitulares([])
 
 }
 return(
@@ -373,6 +402,18 @@ return(
 <h1 className="text-3xl font-bold">
 Partido en Vivo
 </h1>
+
+<div className="text-center text-5xl font-bold mt-4 mb-6">
+
+BDSC {goles.length} - {golesRival.length} {rival}
+
+</div>
+
+<div className="text-center text-xl text-gray-600">
+
+Cuarto {cuarto}
+
+</div>
 
 <div className="text-3xl font-bold">
 {Math.floor(segundos/60)}:{String(segundos%60).padStart(2,"0")}
