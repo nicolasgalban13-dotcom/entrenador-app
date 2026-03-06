@@ -342,7 +342,9 @@ cargarTodo();
 
 async function descargarResumenPartido() {
 
-alert("FUNCION ACTIVADA")
+const elemento = document.getElementById("resumen-partido")
+
+alert(elemento ? "Elemento encontrado" : "Elemento NO encontrado")
 
 }
 
