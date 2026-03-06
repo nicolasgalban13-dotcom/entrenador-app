@@ -13,6 +13,7 @@ const [segundos,setSegundos] = useState(0)
 const [corriendo,setCorriendo] = useState(false)
 const [cuarto,setCuarto] = useState(1)
 const [timeline,setTimeline] = useState<any[]>([])
+const [condicion,setCondicion] = useState("Local")
 
 const [jugadoras,setJugadoras] = useState<any[]>([])
 const [convocadas,setConvocadas] = useState<number[]>([])
@@ -306,15 +307,16 @@ try{
 const { data:partido, error } = await supabase
 .from("partidos")
 .insert({
-
-fecha:new Date().toISOString(),
+fecha:new Date().toISOString().split("T")[0],
 rival,
 tipo,
 equipo,
+condicion,
 goles_favor:goles.length,
 goles_contra:golesRival.length
 
 })
+
 .select()
 .single()
 
@@ -520,6 +522,23 @@ className="border p-2 ml-2"
 
 <option>Oficial</option>
 <option>Amistoso</option>
+
+</select>
+
+</div>
+
+<div>
+
+Condición
+
+<select
+value={condicion}
+onChange={(e)=>setCondicion(e.target.value)}
+className="border p-2 ml-2"
+>
+
+<option>Local</option>
+<option>Visitante</option>
 
 </select>
 
