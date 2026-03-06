@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import html2canvas from "html2canvas";
 
@@ -28,6 +28,7 @@ equipo: "Primera",
 const [convocatoria, setConvocatoria] = useState<any[]>([]);
 const [stats, setStats] = useState<any>({});
 const [golesRival, setGolesRival] = useState(0);
+const resumenRef = useRef(null)
 
 useEffect(() => {
 cargarTodo();
@@ -342,22 +343,19 @@ cargarTodo();
 
 async function descargarResumenPartido(){
 
-alert("funcion ejecutada")
-
-const elemento = document.getElementById("resumen-partido")
-
-console.log(elemento)
-
-if(!elemento){
-alert("no encontro el elemento")
+if(!resumenRef.current){
+alert("No encontró el resumen")
 return
 }
 
-const canvas = await html2canvas(elemento)
+const canvas = await html2canvas(resumenRef.current)
 
-alert("canvas generado")
+const link = document.createElement("a")
 
-document.body.appendChild(canvas)
+link.download = "resumen_partido.png"
+link.href = canvas.toDataURL("image/png")
+
+link.click()
 
 }
 
@@ -808,8 +806,7 @@ Cancelar
 
 <div className="flex flex-col items-center">
 
-<div
-id="resumen-partido"
+<div ref={resumenRef}
 className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white p-8 rounded-xl max-w-md shadow-lg"
 >
 
