@@ -340,11 +340,18 @@ setModo("lista");
 cargarTodo();
 }
 
-async function descargarResumenPartido() {
+async function descargarResumenPartido(){
 
 const elemento = document.getElementById("resumen-partido")
 
-alert(elemento ? "Elemento encontrado" : "Elemento NO encontrado")
+if(!elemento){
+alert("No existe el elemento")
+return
+}
+
+const canvas = await html2canvas(elemento)
+
+document.body.appendChild(canvas)
 
 }
 
