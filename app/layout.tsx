@@ -40,6 +40,9 @@ export default function RootLayout({
             <Link href="/estadisticas" className="hover:text-blue-400">
               Estadisticas
             </Link>
+            <Link href="/partidoenvivo" className="hover:text-blue-400">
+              Partido en Vivo
+            </Link>
           </nav>
 
           <div>{children}</div>
