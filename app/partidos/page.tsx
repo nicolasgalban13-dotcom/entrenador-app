@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import html2canvas from "html2canvas";
 
 export default function Partidos() {
 
@@ -336,6 +337,23 @@ setModo("lista");
 cargarTodo();
 }
 
+async function descargarConvocatoria() {
+
+  const elemento = document.getElementById("convocatoria-export");
+
+  if (!elemento) return;
+
+  const canvas = await html2canvas(elemento);
+
+  const link = document.createElement("a");
+
+  link.download = "convocatoria.png";
+  link.href = canvas.toDataURL();
+
+  link.click();
+
+}
+
 return (
 
 <main className="min-h-screen bg-gray-100 p-8">
@@ -466,7 +484,10 @@ Eliminar
 
 {modo === "convocatoria" && seleccionado && (
 
-<div className="bg-white p-6 rounded shadow max-w-2xl">
+<div
+id="convocatoria-export"
+className="bg-white p-6 rounded shadow max-w-2xl"
+>
 
 <h2 className="text-xl font-bold mb-4">
 Convocatoria - {seleccionado.rival}
@@ -513,6 +534,13 @@ className="mt-4 bg-gray-500 text-white px-4 py-2 rounded"
 
 Volver
 
+</button>
+
+<button
+onClick={descargarConvocatoria}
+className="mt-4 ml-3 bg-blue-600 text-white px-4 py-2 rounded"
+>
+Descargar convocatoria
 </button>
 
 </div>
