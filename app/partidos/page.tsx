@@ -342,39 +342,25 @@ cargarTodo();
 
 async function descargarResumenPartido() {
 
-  const elemento = document.getElementById("resumen-partido")
+console.log("CLICK DESCARGAR")
 
-  if (!elemento) {
-    alert("No se encontró el resumen del partido")
-    return
-  }
+alert("Intentando descargar")
 
-  const canvas = await html2canvas(elemento,{
-    scale:2,
-    backgroundColor:null,
-    useCORS:true
-  })
+const elemento = document.getElementById("resumen-partido")
 
-  canvas.toBlob((blob)=>{
+if(!elemento){
+alert("No se encontró el resumen")
+return
+}
 
-    if(!blob){
-      alert("Error generando imagen")
-      return
-    }
+const canvas = await html2canvas(elemento)
 
-    const url = URL.createObjectURL(blob)
+const link = document.createElement("a")
 
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `BDSC_vs_${seleccionado.rival}.png`
+link.download = "resumen.png"
+link.href = canvas.toDataURL()
 
-    document.body.appendChild(link)
-    link.click()
-
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-
-  })
+link.click()
 
 }
 
