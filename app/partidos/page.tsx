@@ -15,6 +15,7 @@ const [modo, setModo] = useState<
 >("lista");
 
 const [equipoTab, setEquipoTab] = useState<"Primera" | "Intermedia">("Primera");
+const [tipoTab, setTipoTab] = useState<"Oficial" | "Amistoso">("Oficial");
 
 const [form, setForm] = useState({
 fecha: "",
@@ -49,7 +50,9 @@ setJugadoras(j || []);
 }
 
 const partidosFiltrados = partidos.filter(
-(p) => (p.equipo || "Primera") === equipoTab
+(p) =>
+(p.equipo || "Primera") === equipoTab &&
+(p.tipo || "Amistoso") === tipoTab
 );
 
 function resultadoColor(p: any) {
@@ -337,6 +340,42 @@ setModo("lista");
 cargarTodo();
 }
 
+async function descargarResumenPartido() {
+
+  const elemento = document.getElementById("resumen-partido");
+
+  if (!elemento) return;
+
+  const canvas = await html2canvas(elemento);
+
+  const link = document.createElement("a");
+
+  link.download = "resumen_partido.png";
+  link.href = canvas.toDataURL();
+
+  link.click();
+
+}
+
+function obtenerGoleadorasAgrupadas() {
+
+  const conteo: any = {};
+
+  stats.goles?.forEach((g:any)=>{
+
+    const nombre = g.jugadoras?.nombre;
+
+    if(!conteo[nombre]){
+      conteo[nombre] = 0;
+    }
+
+    conteo[nombre]++;
+
+  });
+
+  return Object.entries(conteo);
+
+}
 async function descargarConvocatoria() {
 
   const elemento = document.getElementById("convocatoria-export");
@@ -391,6 +430,32 @@ Intermedia
 </button>
 
 </div>
+
+<div className="flex gap-3 mb-6">
+
+<button
+onClick={() => setTipoTab("Oficial")}
+className={`px-4 py-2 rounded ${
+tipoTab === "Oficial"
+? "bg-red-600 text-white"
+: "bg-gray-200"
+}`}
+>
+Oficiales
+</button>
+
+<button
+onClick={() => setTipoTab("Amistoso")}
+className={`px-4 py-2 rounded ${
+tipoTab === "Amistoso"
+? "bg-blue-600 text-white"
+: "bg-gray-200"
+}`}
+>
+Amistosos
+</button>
+
+</div> 
 
 <button
 onClick={() => abrirEditar()}
@@ -508,6 +573,8 @@ className="flex justify-between border-b py-2"
 
 <span>{j.nombre}</span>
 
+<div className="flex items-center gap-3">
+
 <button
 onClick={() => toggleConvocada(j.id)}
 className={`px-3 py-1 rounded ${
@@ -516,10 +583,28 @@ registro
 : "bg-gray-300"
 }`}
 >
-
 {registro ? "Convocada" : "No convocada"}
-
 </button>
+
+{registro && (
+
+<label className="flex items-center gap-1 text-sm">
+
+<input
+type="checkbox"
+checked={registro.titular}
+onChange={() =>
+toggleTitular(j.id, registro.titular)
+}
+/>
+
+Titular
+
+</label>
+
+)}
+
+</div>
 
 </div>
 
@@ -706,23 +791,38 @@ Cancelar
 
 {modo === "verstats" && seleccionado && (
 
-<div className="bg-white p-6 rounded shadow max-w-2xl">
 
-<h2 className="text-xl font-bold mb-4">
-Estadísticas - {seleccionado.rival}
+<div
+id="resumen-partido"
+className="bg-blue-900 text-white p-6 rounded-xl max-w-md shadow"
+>
+ 
+ 
+<h2 className="text-center text-2xl font-bold mb-4">
+Resultado del Partido
 </h2>
 
-<div className="mb-4">
-Resultado: {seleccionado.goles_favor} - {seleccionado.goles_contra}
+<div className="text-center text-sm mb-2 opacity-80">
+{seleccionado.tipo} • {seleccionado.equipo || "Primera"}
+</div>
+
+<div className="text-center text-lg mb-2">
+BDSC vs {seleccionado.rival}
+</div>
+
+<div className="text-center text-3xl font-bold mb-4">
+{seleccionado.goles_favor} - {seleccionado.goles_contra}
 </div>
 
 <div className="mb-4">
 
-<h3 className="font-semibold">Goles</h3>
+<h3 className="font-semibold mb-2">
+⚽ Goleadoras
+</h3>
 
-{stats.goles?.map((g: any) => (
-<div key={g.id}>
-⚽ {g.jugadoras?.nombre}
+{obtenerGoleadorasAgrupadas().map(([nombre,cantidad]:any,i)=>(
+<div key={i}>
+{"⚽".repeat(cantidad)} {nombre}
 </div>
 ))}
 
@@ -730,15 +830,31 @@ Resultado: {seleccionado.goles_favor} - {seleccionado.goles_contra}
 
 <div>
 
-<h3 className="font-semibold">Tarjetas</h3>
+<h3 className="font-semibold mb-2">
+🟥 Tarjetas
+</h3>
 
-{stats.tarjetas?.map((t: any) => (
+{stats.tarjetas?.map((t:any)=>(
 <div key={t.id}>
 {t.tipo} — {t.jugadoras?.nombre}
 </div>
 ))}
 
+<button
+onClick={descargarResumenPartido}
+className="bg-green-600 text-white px-4 py-2 rounded mt-6 w-full"
+>
+Descargar resumen del partido
+</button>
+
 </div>
+
+<button
+onClick={descargarResumenPartido}
+className="bg-green-600 text-white px-4 py-2 rounded mt-4"
+>
+Descargar resumen del partido
+</button>
 
 <button
 onClick={() => setModo("lista")}

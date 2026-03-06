@@ -92,8 +92,8 @@ setJugadoras(data || [])
 
 function registrarEvento(texto:string){
 
-setTimeline([
-...timeline,
+setTimeline(t=>[
+...t,
 {
 minuto: Math.floor(segundos/60),
 evento:texto
@@ -107,7 +107,7 @@ function sumarCornerPropio(){
 const copia=[...cornersPropios]
 copia[cuarto-1]++
 setCornersPropios(copia)
-
+registrarEvento("Corner corto a favor")
 }
 
 function sumarCornerRival(){
@@ -115,7 +115,7 @@ function sumarCornerRival(){
 const copia=[...cornersRival]
 copia[cuarto-1]++
 setCornersRival(copia)
-
+registrarEvento("Corner corto en contra")
 }
 
 function sumarAreaPropia(){
@@ -123,7 +123,7 @@ function sumarAreaPropia(){
 const copia=[...areasPropias]
 copia[cuarto-1]++
 setAreasPropias(copia)
-
+registrarEvento("Ingreso area")
 }
 
 function sumarAreaRival(){
@@ -131,7 +131,7 @@ function sumarAreaRival(){
 const copia=[...areasRival]
 copia[cuarto-1]++
 setAreasRival(copia)
-
+registrarEvento("ingresos area rival")
 }
 
 function agregarGol(){
@@ -301,7 +301,7 @@ const {data:partido} = await supabase
 .from("partidos")
 .insert({
 
-fecha:new Date(),
+fecha:new Date().toISOString(),
 rival,
 tipo,
 equipo,
@@ -490,6 +490,10 @@ className="bg-red-600 text-white px-4 py-2 rounded"
 + Corner Rival
 </button>
 
+<div className="mt-2 text-sm">
+Favor: {cornersPropios[cuarto-1]} | Rival: {cornersRival[cuarto-1]}
+</div>
+
 </div>
 
 <div className="bg-white p-6 rounded shadow">
@@ -511,6 +515,10 @@ className="bg-red-600 text-white px-4 py-2 rounded"
 >
 + Área Rival
 </button>
+
+<div className="mt-2 text-sm">
+Favor: {areasPropias[cuarto-1]} | Rival: {areasRival[cuarto-1]}
+</div>
 
 </div>
 
@@ -534,6 +542,59 @@ className="bg-red-700 text-white px-4 py-2 rounded"
 + Gol Rival
 </button>
 
+<div className="mt-4 space-y-2">
+
+{goles.map((g,i)=>(
+
+<div key={i} className="flex gap-3 items-center">
+
+<span>Q{g.cuarto}</span>
+
+<select
+value={g.jugadora || ""}
+onChange={(e)=>{
+
+const copia=[...goles]
+copia[i].jugadora = Number(e.target.value)
+setGoles(copia)
+
+}}
+className="border p-1"
+>
+
+<option value="">Jugadora</option>
+
+{jugadoras.map(j=>(
+<option key={j.id} value={j.id}>
+{j.nombre}
+</option>
+))}
+
+</select>
+
+<select
+value={g.tipo}
+onChange={(e)=>{
+
+const copia=[...goles]
+copia[i].tipo = e.target.value
+setGoles(copia)
+
+}}
+className="border p-1"
+>
+
+<option value="jugada">Jugada</option>
+<option value="corto">Corner Corto</option>
+
+</select>
+
+</div>
+
+))}
+
+</div>
+
 </div>
 
 <div className="bg-white p-6 rounded shadow">
@@ -556,6 +617,59 @@ className="bg-red-500 text-white px-4 py-2 rounded"
 + Tarjeta Rival
 </button>
 
+<div className="mt-4 space-y-2">
+
+{tarjetas.map((t,i)=>(
+
+<div key={i} className="flex gap-3 items-center">
+
+<span>Q{t.cuarto}</span>
+
+<select
+value={t.jugadora || ""}
+onChange={(e)=>{
+
+const copia=[...tarjetas]
+copia[i].jugadora = Number(e.target.value)
+setTarjetas(copia)
+
+}}
+className="border p-1"
+>
+
+<option value="">Jugadora</option>
+
+{jugadoras.map(j=>(
+<option key={j.id} value={j.id}>
+{j.nombre}
+</option>
+))}
+
+</select>
+
+<select
+value={t.tipo}
+onChange={(e)=>{
+
+const copia=[...tarjetas]
+copia[i].tipo = e.target.value
+setTarjetas(copia)
+
+}}
+className="border p-1"
+>
+
+<option value="verde">Verde</option>
+<option value="amarilla">Amarilla</option>
+<option value="roja">Roja</option>
+
+</select>
+
+</div>
+
+))}
+
+</div>
 </div>
 
 <div className="text-center">
