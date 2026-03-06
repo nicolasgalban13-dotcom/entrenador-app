@@ -799,45 +799,38 @@ Cancelar
 {modo === "verstats" && seleccionado && (
 
 
+<div className="flex flex-col items-center">
+
 <div
 id="resumen-partido"
-className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white p-10 rounded-2xl w-[500px] h-[500px] shadow-xl flex flex-col justify-center items-center text-center"
+className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white p-8 rounded-xl max-w-md shadow-lg"
 >
 
-<img
-src="/escudo.png"
-className="w-20 mx-auto mb-4"
-/>
-
-<h2 className="text-xl font-semibold mb-2 opacity-90">
+<h2 className="text-center text-2xl font-bold mb-4">
 Resultado del Partido
 </h2>
 
-<div className="text-sm mb-2 opacity-80">
+<div className="text-center text-sm mb-2 opacity-80">
 {seleccionado.tipo} • {seleccionado.equipo || "Primera"}
 </div>
 
-<div className="text-lg mb-2">
+<div className="text-center text-lg mb-2">
 BDSC vs {seleccionado.rival}
 </div>
 
-<div className="text-6xl font-bold mb-6">
+<div className="text-center text-5xl font-bold mb-6">
 {seleccionado.goles_favor} - {seleccionado.goles_contra}
 </div>
 
-<div className="mb-6">
+<div className="mb-4">
 
-<h3 className="font-semibold mb-2 text-lg">
-⚽ Goleadoras
+<h3 className="font-semibold mb-2">
+Goleadoras
 </h3>
-
-{obtenerGoleadorasAgrupadas().length === 0 && (
-<div className="opacity-70">Sin goles</div>
-)}
 
 {obtenerGoleadorasAgrupadas().map(([nombre,cantidad]:any,i)=>(
 
-<div key={i} className="text-lg">
+<div key={i}>
 {"⚽".repeat(cantidad)} {nombre}
 </div>
 
@@ -845,14 +838,14 @@ BDSC vs {seleccionado.rival}
 
 </div>
 
-<div className="mb-6">
+<div>
 
-<h3 className="font-semibold mb-2 text-lg">
-🟥 Tarjetas
+<h3 className="font-semibold mb-2">
+Tarjetas
 </h3>
 
 {stats.tarjetas?.length === 0 && (
-<div className="opacity-70">Sin tarjetas</div>
+<div>Sin tarjetas</div>
 )}
 
 {stats.tarjetas?.map((t:any)=>(
@@ -865,25 +858,28 @@ BDSC vs {seleccionado.rival}
 
 </div>
 
+</div>
+
+{/* BOTONES FUERA DEL EXPORT */}
+
 <button
 onClick={descargarResumenPartido}
-className="bg-green-600 text-white px-4 py-2 rounded mt-4 w-full hover:bg-green-700"
+className="bg-green-600 text-white px-4 py-2 rounded mt-6 w-full max-w-md"
 >
 Descargar resumen del partido
 </button>
 
 <button
 onClick={() => setModo("lista")}
-className="mt-3 bg-gray-500 text-white px-4 py-2 rounded w-full"
+className="mt-3 bg-gray-500 text-white px-4 py-2 rounded w-full max-w-md"
 >
-
 Volver
-
 </button>
 
 </div>
 
 )}
+
 {modo === "editar" && (
 
 <div className="bg-white p-6 rounded shadow space-y-4 max-w-xl">
