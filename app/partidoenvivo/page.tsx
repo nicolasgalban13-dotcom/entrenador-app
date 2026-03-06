@@ -319,9 +319,8 @@ goles_contra:golesRival.length
 .single()
 
 if(error){
-
-console.log("Error creando partido:",error)
-alert("Error guardando partido")
+console.log("ERROR SUPABASE:",error)
+alert("Error guardando partido: " + error.message)
 return
 
 }
